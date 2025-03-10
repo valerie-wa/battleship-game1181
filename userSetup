@@ -1,0 +1,80 @@
+function [cpu_ships] = userSetup(my_scene, ship_id, ship_length, user_board)
+
+%{
+Changes we make to source code - first and last line of change have %C
+%}
+
+% the "board" of ships is initially empty: 10 by 10 of zeros
+cpu_ships = user_board;
+
+% length of the ships, ship 1 is the carrier and has length 5, 
+% ship 2 is the battleship, ship 3 is the submarine, ship 4 is the cruiser,
+% and ship 5 is the PT boat
+%ship_length = [5,4,3,3,2]; %making fixed array of length 5 that's empty
+% define ship length
+
+% loop over each ship, shipID is the type of ship (battleship, sub etc)
+%for ship_id = 1:5
+    
+    % set a flag for the while loop, we will try random locations until we
+    % find one that fits
+    ship_placed = false;
+    while ~ship_placed % continue to try and place the ship until successful
+        % randomly choose between horizontal and vertical orientation by 
+        % setting the horizontal flag here
+        %C 
+        vOrH = input("Choose ship orientation: vertical (v) or horizontal (h): \n","s");%randi([0 1]); 
+        horizontal = strcmp(vOrH , "h"); %if user entered h, will be true (1)
+            
+
+        length = ship_length(ship_id);
+
+        %C 
+        % set the the row and column of the left end new ship to the
+        % row where the user clicked
+        fprintf("Now click to place your ship!\n")
+        [row,col,button] = getMouseInput (my_scene); %change this input
+        % but only on a certain range of columns depending on the
+        % length the user chooses
+
+        %c
+        if horizontal == 1  
+            % check to see if that location is empty by summing the values
+            % on the board where the new ship would go, if it ends up being
+            % zero, then there is room to put the new ship there
+            if col:(col+ship_length(ship_id)-1) < 22
+                if sum(cpu_ships(row,col:(col+ship_length(ship_id)-1))) == 0
+                    % if it is, fill that part of the board with the ships id
+                    % number
+                    cpu_ships(row,col:(col+ship_length(ship_id)-1)) = ship_id;
+                    % and set the ship_place flag to true so that we exit the
+                    % loop
+                    ship_placed = true;
+                else
+                    fprintf('Ship already placed here\n')
+                end
+            else
+                fprintf("Ship cannot be placed here, ship goes off board.\n")
+            end
+        else % vertical
+            % {if the ship is vertical, do that same thing as above, but now
+            % the row and column indicate the top edge of the ship, and
+            % only certain rows are allowed
+            %while (length > (10-row))
+             %   [row,col,button] = getMouseInput (my_scene); %change this input
+            %end            
+            
+            % this part is same as in the horizontal orientation, but for a
+            % range of rows instead of a range of columns
+            if row:(row+length-1) < 10
+                if sum(cpu_ships(row:(row+length-1),col)) == 0
+                    cpu_ships(row:(row+ship_length(ship_id)-1),col) = ship_id;
+                    ship_placed = true;
+                else
+                    fprintf('Ship already placed here\n')
+                end
+            else
+                fprintf("Ship cannot be placed here, ship goes off board.\n")
+            end
+        end
+    end
